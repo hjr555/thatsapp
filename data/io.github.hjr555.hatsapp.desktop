@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=HatsApp
+GenericName=WhatsApp Desktop Client
+Comment=Native KDE Plasma desktop client for WhatsApp Web
+Exec=hatsapp %u
+Icon=io.github.hjr555.hatsapp
+Terminal=false
+Categories=Network;InstantMessaging;Chat;Qt;KDE;
+Keywords=WhatsApp;Chat;Messaging;IM;
+MimeType=x-scheme-handler/whatsapp;x-scheme-handler/whatsapp-smb;
+StartupNotify=true
+StartupWMClass=io.github.hjr555.hatsapp
+SingleMainWindow=true
+X-KDE-DBUS-ServiceName=io.github.hjr555.hatsapp

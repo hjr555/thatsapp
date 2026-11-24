@@ -1,0 +1,46 @@
+# Original input installers, Store packages, archives, and extracted binaries
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+*.eappx
+*.emsix
+*.BlockMap
+*.exe
+*.msi
+*.zip
+*.tar.gz
+*.7z
+*.iso
+*.dmg
+*.cab
+*.pkg
+*.pak
+*.bin
+*.ubi
+*.ubifs
+*.img
+
+# Reference extracted directories (keep documentation and checksums trackable)
+reference/extracted/
+
+# Build & packaging outputs
+build/
+dist/
+target/
+out/
+*.rpm
+*.srpm
+CMakeUserPresets.json
+compile_commands.json
+
+# IDE / editor / tooling caches
+.cache/
+.vscode/
+.idea/
+*.user
+*.swp
+*~
+node_modules/
+__pycache__/
+*.pyc
