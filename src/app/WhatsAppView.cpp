@@ -2,9 +2,7 @@
 #include "core/ZoomLevels.h"
 
 #include <KLocalizedString>
-#include <QChildEvent>
 #include <QContextMenuEvent>
-#include <QKeyEvent>
 #include <QMenu>
 #include <QWebEngineContextMenuRequest>
 #include <QWebEnginePage>
@@ -16,76 +14,6 @@ WhatsAppView::WhatsAppView(AppConfig &config, QWidget *parent)
     : QWebEngineView(parent)
     , m_config(config)
 {
-    attachFocusProxyFilter();
-}
-
-void WhatsAppView::attachFocusProxyFilter()
-{
-    QWidget *proxy = focusProxy();
-    if (proxy && proxy != m_installedFocusProxy) {
-        if (m_installedFocusProxy) {
-            m_installedFocusProxy->removeEventFilter(this);
-        }
-        proxy->installEventFilter(this);
-        m_installedFocusProxy = proxy;
-    }
-}
-
-bool WhatsAppView::event(QEvent *event)
-{
-    if (event->type() == QEvent::ChildAdded || event->type() == QEvent::ChildPolished) {
-        attachFocusProxyFilter();
-    }
-    return QWebEngineView::event(event);
-}
-
-bool WhatsAppView::handleAppShortcutKey(int key, Qt::KeyboardModifiers mods)
-{
-    const Qt::KeyboardModifiers cleanMods = mods & (Qt::ControlModifier | Qt::ShiftModifier | Qt::AltModifier | Qt::MetaModifier);
-
-    if (cleanMods == Qt::ControlModifier && key == Qt::Key_M) {
-        Q_EMIT toggleMenuBarRequested();
-        return true;
-    }
-    if ((cleanMods == Qt::ControlModifier && key == Qt::Key_B)
-        || (cleanMods == Qt::NoModifier && key == Qt::Key_F9)) {
-        Q_EMIT toggleSidebarRequested();
-        return true;
-    }
-    if (cleanMods == Qt::ControlModifier && key == Qt::Key_Comma) {
-        Q_EMIT openSettingsRequested();
-        return true;
-    }
-    if (cleanMods == (Qt::ControlModifier | Qt::ShiftModifier) && key == Qt::Key_M) {
-        Q_EMIT toggleHideNotificationsRequested();
-        return true;
-    }
-    return false;
-}
-
-bool WhatsAppView::eventFilter(QObject *watched, QEvent *event)
-{
-    if (watched == m_installedFocusProxy) {
-        if (event->type() == QEvent::ShortcutOverride) {
-            auto *ke = static_cast<QKeyEvent *>(event);
-            const Qt::KeyboardModifiers mods = ke->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier | Qt::AltModifier | Qt::MetaModifier);
-            const bool isReserved =
-                (mods == Qt::ControlModifier && (ke->key() == Qt::Key_M || ke->key() == Qt::Key_B || ke->key() == Qt::Key_Comma))
-                || (mods == Qt::NoModifier && ke->key() == Qt::Key_F9)
-                || (mods == (Qt::ControlModifier | Qt::ShiftModifier) && ke->key() == Qt::Key_M);
-            if (isReserved) {
-                ke->accept();
-                return true;
-            }
-        } else if (event->type() == QEvent::KeyPress) {
-            auto *ke = static_cast<QKeyEvent *>(event);
-            if (handleAppShortcutKey(ke->key(), ke->modifiers())) {
-                ke->accept();
-                return true;
-            }
-        }
-    }
-    return QWebEngineView::eventFilter(watched, event);
 }
 
 void WhatsAppView::setMenuBarVisibleState(bool visible)

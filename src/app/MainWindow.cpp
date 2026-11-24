@@ -21,6 +21,7 @@
 #include <QEvent>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QKeyEvent>
 #include <QMenu>
 #include <QMenuBar>
 #include <QProcess>
@@ -99,11 +100,16 @@ MainWindow::MainWindow(AppConfig &config, QWidget *parent)
     // Auto-save & restore window size/geometry via KConfig (~/.config/hatsapprc)
     setAutoSaveSettings(QStringLiteral("MainWindow"), true);
 
+    qApp->installEventFilter(this);
+
     m_view->setUrl(QUrl(QString::fromLatin1(kWhatsAppWebUrl)));
 }
 
 MainWindow::~MainWindow()
 {
+    if (qApp) {
+        qApp->removeEventFilter(this);
+    }
     if (m_devToolsView) {
         m_devToolsView->close();
     }
@@ -178,7 +184,7 @@ void MainWindow::installSidebarCollapseScript()
     window.__hatsappSidebarInstalled = true;
 
     const STYLE_ID = 'hatsapp-sidebar-style';
-    const BTN_ID = 'hatsapp-sidebar-expand-btn';
+    const BTN_ID = 'hatsapp-sidebar-toggle-btn';
 
     function ensureStyle() {
         if (document.getElementById(STYLE_ID)) return;
@@ -187,12 +193,22 @@ void MainWindow::installSidebarCollapseScript()
         style.textContent = `
             html.hatsapp-sidebar-collapsed:has(#main) [data-hatsapp-sidebar="true"] {
                 display: none !important;
+                width: 0 !important;
+                min-width: 0 !important;
+                max-width: 0 !important;
+                flex: 0 0 0 !important;
+            }
+            html.hatsapp-sidebar-collapsed:has(#main) [data-hatsapp-split-container="true"] {
+                display: flex !important;
+                grid-template-columns: 1fr !important;
             }
             html.hatsapp-sidebar-collapsed:has(#main) [data-hatsapp-main-pane="true"] {
                 flex: 1 1 100% !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 min-width: 100% !important;
+                grid-column: 1 / -1 !important;
+                left: 0 !important;
             }
             html.hatsapp-sidebar-collapsed:has(#main) [data-hatsapp-shell="true"] {
                 max-width: 100% !important;
@@ -208,62 +224,101 @@ void MainWindow::installSidebarCollapseScript()
                 top: 50%;
                 transform: translateY(-50%);
                 z-index: 2147483647;
-                width: 22px;
+                width: 18px;
                 height: 52px;
-                border: 1px solid rgba(128, 128, 128, 0.35);
+                border: 1px solid rgba(134, 150, 160, 0.35);
                 border-left: none;
                 border-radius: 0 8px 8px 0;
                 background: rgba(32, 44, 51, 0.65);
                 color: #e9edef;
-                font-size: 16px;
+                font-size: 15px;
+                font-weight: 600;
                 line-height: 1;
                 cursor: pointer;
                 align-items: center;
                 justify-content: center;
                 padding: 0;
-                opacity: 0.45;
-                transition: opacity 0.15s ease, width 0.15s ease;
+                opacity: 0.42;
+                transition: opacity 0.15s ease, width 0.15s ease, background 0.15s ease;
                 backdrop-filter: blur(6px);
+                user-select: none;
             }
             #${BTN_ID}:hover {
                 opacity: 0.98;
-                width: 28px;
+                width: 24px;
+                background: rgba(32, 44, 51, 0.92);
             }
-            html.hatsapp-sidebar-collapsed:has(#main) #${BTN_ID} {
+            html:has(#main) #${BTN_ID}[data-ready="true"] {
                 display: flex;
             }
         `;
         (document.head || document.documentElement).appendChild(style);
     }
 
-    function ensureExpandButton() {
-        if (document.getElementById(BTN_ID) || !document.body) return;
-        const btn = document.createElement('button');
+    function ensureToggleButton() {
+        let btn = document.getElementById(BTN_ID);
+        if (btn) return btn;
+        if (!document.body) return null;
+        btn = document.createElement('button');
         btn.id = BTN_ID;
         btn.type = 'button';
-        btn.title = 'Show chat sidebar (Ctrl+B)';
-        btn.setAttribute('aria-label', 'Show chat sidebar');
-        btn.textContent = '\u203A';
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            window.__hatsappSetSidebarCollapsed(false, true);
+            const isCollapsed = document.documentElement.classList.contains('hatsapp-sidebar-collapsed');
+            window.__hatsappSetSidebarCollapsed(!isCollapsed, true);
         });
         document.body.appendChild(btn);
+        return btn;
     }
 
     function clearTags() {
         document.querySelectorAll('[data-hatsapp-sidebar]').forEach(el => el.removeAttribute('data-hatsapp-sidebar'));
         document.querySelectorAll('[data-hatsapp-main-pane]').forEach(el => el.removeAttribute('data-hatsapp-main-pane'));
+        document.querySelectorAll('[data-hatsapp-split-container]').forEach(el => el.removeAttribute('data-hatsapp-split-container'));
         document.querySelectorAll('[data-hatsapp-shell]').forEach(el => el.removeAttribute('data-hatsapp-shell'));
     }
 
-    function tagLayout() {
-        const side = document.getElementById('side');
-        const main = document.getElementById('main');
-        if (!side || !main) return;
+    function findSidebarElement() {
+        return document.getElementById('side')
+            || document.getElementById('pane-side')
+            || document.querySelector('[aria-label="Chat list"]');
+    }
 
-        // Find lowest common ancestor of #side and #main
+    function updateButtonVisuals(mainCol) {
+        const btn = ensureToggleButton();
+        if (!btn) return;
+        const isCollapsed = document.documentElement.classList.contains('hatsapp-sidebar-collapsed');
+        const main = document.getElementById('main');
+        if (!main || !mainCol) {
+            btn.removeAttribute('data-ready');
+            return;
+        }
+        btn.setAttribute('data-ready', 'true');
+        if (isCollapsed) {
+            btn.style.left = '0px';
+            btn.textContent = '\u203A';
+            btn.title = 'Show chat sidebar (Ctrl+B)';
+            btn.setAttribute('aria-label', 'Show chat sidebar');
+        } else {
+            const rect = mainCol.getBoundingClientRect();
+            const leftPx = Math.max(0, Math.round(rect.left));
+            btn.style.left = `${leftPx}px`;
+            btn.textContent = '\u2039';
+            btn.title = 'Collapse chat sidebar (Ctrl+B)';
+            btn.setAttribute('aria-label', 'Collapse chat sidebar');
+        }
+    }
+
+    function tagLayout(forceRetag) {
+        const side = findSidebarElement();
+        const main = document.getElementById('main');
+        if (!side || !main) {
+            updateButtonVisuals(null);
+            return;
+        }
+
+        // Find lowest common ancestor of sidebar and #main
         const sideAncestors = new Set();
         for (let el = side; el; el = el.parentElement) {
             sideAncestors.add(el);
@@ -274,22 +329,33 @@ void MainWindow::installSidebarCollapseScript()
         }
         if (!lca) return;
 
-        // Avoid needless DOM churn if already tagged properly
         const mainCol = Array.from(lca.children).find(ch => ch === main || ch.contains(main));
         const sideCol = Array.from(lca.children).find(ch => ch === side || ch.contains(side));
         if (!mainCol || !sideCol || mainCol === sideCol) return;
-        if (mainCol.dataset.hatsappMainPane === 'true' && sideCol.dataset.hatsappSidebar === 'true') return;
+
+        if (!forceRetag
+            && mainCol.dataset.hatsappMainPane === 'true'
+            && sideCol.dataset.hatsappSidebar === 'true') {
+            updateButtonVisuals(mainCol);
+            return;
+        }
+
+        const wasCollapsed = document.documentElement.classList.contains('hatsapp-sidebar-collapsed');
+        if (wasCollapsed) {
+            document.documentElement.classList.remove('hatsapp-sidebar-collapsed');
+        }
 
         clearTags();
+        lca.setAttribute('data-hatsapp-split-container', 'true');
         mainCol.setAttribute('data-hatsapp-main-pane', 'true');
         sideCol.setAttribute('data-hatsapp-sidebar', 'true');
 
-        // Also hide any left-side sibling navigation rail inside lca or up to 2 wrapper levels above lca
+        // Hide any left-side sibling navigation rail inside lca or up to 3 wrapper levels above lca
         const mainLeft = mainCol.getBoundingClientRect().left;
         for (const ch of Array.from(lca.children)) {
             if (ch === mainCol || ch === sideCol) continue;
             const rect = ch.getBoundingClientRect();
-            if (rect.width > 0 && rect.right <= mainLeft + 8) {
+            if (rect.width > 0 && rect.right <= mainLeft + 12) {
                 ch.setAttribute('data-hatsapp-sidebar', 'true');
             }
         }
@@ -301,7 +367,7 @@ void MainWindow::installSidebarCollapseScript()
             for (const sib of Array.from(parent.children)) {
                 if (sib === cur) continue;
                 const rect = sib.getBoundingClientRect();
-                if (rect.width > 0 && rect.width <= 120 && rect.right <= curLeft + 8) {
+                if (rect.width > 0 && rect.width <= 140 && rect.right <= curLeft + 12) {
                     sib.setAttribute('data-hatsapp-sidebar', 'true');
                 }
             }
@@ -311,51 +377,56 @@ void MainWindow::installSidebarCollapseScript()
             }
             cur = parent;
         }
+
+        if (wasCollapsed) {
+            document.documentElement.classList.add('hatsapp-sidebar-collapsed');
+        }
+        updateButtonVisuals(mainCol);
     }
 
     let scheduled = false;
-    function scheduleTag() {
+    function scheduleLayoutUpdate() {
         if (scheduled) return;
         scheduled = true;
         requestAnimationFrame(() => {
             scheduled = false;
             ensureStyle();
-            ensureExpandButton();
-            if (document.documentElement.classList.contains('hatsapp-sidebar-collapsed')) {
-                tagLayout();
-            }
+            ensureToggleButton();
+            tagLayout(false);
         });
     }
 
     window.__hatsappSetSidebarCollapsed = function(collapsed, notifyHost) {
         ensureStyle();
-        ensureExpandButton();
+        ensureToggleButton();
         const isCollapsed = Boolean(collapsed);
         if (isCollapsed) {
-            tagLayout();
+            tagLayout(true);
             document.documentElement.classList.add('hatsapp-sidebar-collapsed');
         } else {
             document.documentElement.classList.remove('hatsapp-sidebar-collapsed');
-            clearTags();
+            tagLayout(false);
         }
+        const mainCol = document.querySelector('[data-hatsapp-main-pane="true"]');
+        updateButtonVisuals(mainCol);
         if (notifyHost) {
             console.debug(isCollapsed ? '__hatsapp:sidebar=1' : '__hatsapp:sidebar=0');
         }
     };
 
     const observer = new MutationObserver(() => {
-        if (document.documentElement.classList.contains('hatsapp-sidebar-collapsed')) {
-            scheduleTag();
-        }
+        scheduleLayoutUpdate();
     });
 
     function startObserver() {
         ensureStyle();
-        ensureExpandButton();
+        ensureToggleButton();
         const target = document.getElementById('app') || document.body || document.documentElement;
         if (target) {
             observer.observe(target, { childList: true, subtree: true });
         }
+        window.addEventListener('resize', scheduleLayoutUpdate, { passive: true });
+        scheduleLayoutUpdate();
     }
 
     if (document.readyState === 'loading') {
@@ -620,6 +691,40 @@ void MainWindow::changeEvent(QEvent *event)
     if (event->type() == QEvent::ActivationChange || event->type() == QEvent::WindowStateChange) {
         m_notificationController->setWindowFocused(isActiveWindow() && !isMinimized() && isVisible());
     }
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if ((event->type() == QEvent::ShortcutOverride || event->type() == QEvent::KeyPress)
+        && isActiveWindow()
+        && QApplication::activeModalWidget() == nullptr) {
+        auto *ke = static_cast<QKeyEvent *>(event);
+        const Qt::KeyboardModifiers mods = ke->modifiers()
+            & (Qt::ControlModifier | Qt::ShiftModifier | Qt::AltModifier | Qt::MetaModifier);
+
+        const bool isMenuBar = (mods == Qt::ControlModifier && ke->key() == Qt::Key_M);
+        const bool isSidebar = (mods == Qt::ControlModifier && ke->key() == Qt::Key_B)
+            || (mods == Qt::NoModifier && ke->key() == Qt::Key_F9);
+        const bool isSettings = (mods == Qt::ControlModifier && ke->key() == Qt::Key_Comma);
+        const bool isMuteNotif = (mods == (Qt::ControlModifier | Qt::ShiftModifier) && ke->key() == Qt::Key_M);
+
+        if (isMenuBar || isSidebar || isSettings || isMuteNotif) {
+            if (event->type() == QEvent::KeyPress) {
+                if (isMenuBar) {
+                    toggleMenuBar();
+                } else if (isSidebar) {
+                    toggleSidebar();
+                } else if (isSettings) {
+                    openSettingsDialog();
+                } else if (isMuteNotif) {
+                    m_notificationController->setHideNotifications(!m_notificationController->isHidden());
+                }
+            }
+            ke->accept();
+            return true;
+        }
+    }
+    return KMainWindow::eventFilter(watched, event);
 }
 
 void MainWindow::openSettingsDialog()

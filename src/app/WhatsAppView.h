@@ -33,15 +33,9 @@ Q_SIGNALS:
 protected:
     void contextMenuEvent(QContextMenuEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
-    bool eventFilter(QObject *watched, QEvent *event) override;
-    bool event(QEvent *event) override;
 
 private:
-    void attachFocusProxyFilter();
-    bool handleAppShortcutKey(int key, Qt::KeyboardModifiers mods);
-
     AppConfig &m_config;
-    QPointer<QObject> m_installedFocusProxy;
     bool m_menuBarVisible = false;
     bool m_sidebarCollapsed = false;
 };
