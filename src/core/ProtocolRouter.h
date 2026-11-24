@@ -2,7 +2,7 @@
 
 #include <QUrl>
 
-namespace hatsapp {
+namespace thatsapp {
 
 class ProtocolRouter {
 public:
@@ -10,4 +10,4 @@ public:
     static QUrl toWebWhatsAppUrl(const QUrl &url);
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

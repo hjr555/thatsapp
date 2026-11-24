@@ -8,7 +8,7 @@
 #include <QWebEnginePage>
 #include <QWheelEvent>
 
-namespace hatsapp {
+namespace thatsapp {
 
 WhatsAppView::WhatsAppView(AppConfig &config, QWidget *parent)
     : QWebEngineView(parent)
@@ -155,7 +155,7 @@ void WhatsAppView::contextMenuEvent(QContextMenuEvent *event)
         }
     }
 
-    // HatsApp window/layout controls (always reachable even when the menu bar is hidden)
+    // ThatsApp window/layout controls (always reachable even when the menu bar is hidden)
     if (hasAny) {
         menu.addSeparator();
     }
@@ -171,7 +171,7 @@ void WhatsAppView::contextMenuEvent(QContextMenuEvent *event)
     connect(menuBarAct, &QAction::triggered, this, &WhatsAppView::toggleMenuBarRequested);
 
     if (!m_menuBarVisible) {
-        auto *settingsAct = menu.addAction(QIcon::fromTheme(QStringLiteral("configure")), i18n("Configure HatsApp..."));
+        auto *settingsAct = menu.addAction(QIcon::fromTheme(QStringLiteral("configure")), i18n("Configure ThatsApp..."));
         connect(settingsAct, &QAction::triggered, this, &WhatsAppView::openSettingsRequested);
     }
 
@@ -201,4 +201,4 @@ void WhatsAppView::wheelEvent(QWheelEvent *event)
     QWebEngineView::wheelEvent(event);
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

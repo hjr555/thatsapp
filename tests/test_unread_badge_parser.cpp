@@ -3,7 +3,7 @@
 
 #include <QtTest/QtTest>
 
-using hatsapp::UnreadBadgeParser;
+using thatsapp::UnreadBadgeParser;
 
 class TestUnreadBadgeParser : public QObject {
     Q_OBJECT
@@ -21,12 +21,12 @@ private Q_SLOTS:
 
     void zoomStepBounds()
     {
-        QCOMPARE(hatsapp::nextZoomIn(1.0), 1.1);
-        QCOMPARE(hatsapp::nextZoomOut(1.0), 0.9);
-        QCOMPARE(hatsapp::nextZoomIn(1.5), 1.5);
-        QCOMPARE(hatsapp::nextZoomOut(0.8), 0.8);
-        QCOMPARE(hatsapp::clampZoom(5.0), 1.5);
-        QCOMPARE(hatsapp::clampZoom(0.1), 0.8);
+        QCOMPARE(thatsapp::nextZoomIn(1.0), 1.1);
+        QCOMPARE(thatsapp::nextZoomOut(1.0), 0.9);
+        QCOMPARE(thatsapp::nextZoomIn(1.5), 1.5);
+        QCOMPARE(thatsapp::nextZoomOut(0.8), 0.8);
+        QCOMPARE(thatsapp::clampZoom(5.0), 1.5);
+        QCOMPARE(thatsapp::clampZoom(0.1), 0.8);
     }
 };
 

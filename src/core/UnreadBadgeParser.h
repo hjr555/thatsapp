@@ -2,11 +2,11 @@
 
 #include <QString>
 
-namespace hatsapp {
+namespace thatsapp {
 
 class UnreadBadgeParser {
 public:
     static int parseUnreadCount(const QString &documentTitle);
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

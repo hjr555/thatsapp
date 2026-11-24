@@ -5,7 +5,7 @@
 #include <KSharedConfig>
 #include <QString>
 
-namespace hatsapp {
+namespace thatsapp {
 
 class AppConfig {
 public:
@@ -82,4 +82,4 @@ private:
     KSharedConfig::Ptr m_config;
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

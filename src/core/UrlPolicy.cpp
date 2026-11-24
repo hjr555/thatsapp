@@ -1,6 +1,6 @@
 #include "core/UrlPolicy.h"
 
-namespace hatsapp {
+namespace thatsapp {
 
 bool UrlPolicy::isInternalWhatsAppUrl(const QUrl &url)
 {
@@ -42,4 +42,4 @@ bool UrlPolicy::isSupportedExternalScheme(const QUrl &url)
         || scheme == QStringLiteral("mailto");
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

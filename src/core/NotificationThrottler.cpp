@@ -1,6 +1,6 @@
 #include "core/NotificationThrottler.h"
 
-namespace hatsapp {
+namespace thatsapp {
 
 NotificationThrottler::NotificationThrottler(Config config)
     : m_config(config)
@@ -93,4 +93,4 @@ QString NotificationThrottler::normalizeKey(const QString &chatKey)
     return trimmed.isEmpty() ? QStringLiteral("_default") : trimmed;
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

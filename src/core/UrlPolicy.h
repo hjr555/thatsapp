@@ -2,7 +2,7 @@
 
 #include <QUrl>
 
-namespace hatsapp {
+namespace thatsapp {
 
 class UrlPolicy {
 public:
@@ -10,4 +10,4 @@ public:
     static bool isSupportedExternalScheme(const QUrl &url);
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

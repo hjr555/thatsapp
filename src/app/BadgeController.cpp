@@ -5,7 +5,7 @@
 #include <QDBusMessage>
 #include <QVariantMap>
 
-namespace hatsapp {
+namespace thatsapp {
 
 BadgeController::BadgeController(QObject *parent)
     : QObject(parent)
@@ -31,7 +31,7 @@ void BadgeController::setUnreadCount(int count)
 void BadgeController::publishLauncherBadge(int count)
 {
     QDBusMessage signal = QDBusMessage::createSignal(
-        QStringLiteral("/io/github/hjr555/hatsapp"),
+        QStringLiteral("/io/github/hjr555/thatsapp"),
         QStringLiteral("com.canonical.Unity.LauncherEntry"),
         QStringLiteral("Update"));
 
@@ -39,8 +39,8 @@ void BadgeController::publishLauncherBadge(int count)
     props.insert(QStringLiteral("count"), static_cast<qint64>(count));
     props.insert(QStringLiteral("count-visible"), count > 0);
 
-    signal << QStringLiteral("application://io.github.hjr555.hatsapp.desktop") << props;
+    signal << QStringLiteral("application://io.github.hjr555.thatsapp.desktop") << props;
     QDBusConnection::sessionBus().send(signal);
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

@@ -8,7 +8,7 @@ class QCheckBox;
 class QComboBox;
 class QSpinBox;
 
-namespace hatsapp {
+namespace thatsapp {
 
 class SettingsDialog : public QDialog {
     Q_OBJECT
@@ -53,4 +53,4 @@ private:
     QCheckBox *m_devModeCheck = nullptr;
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

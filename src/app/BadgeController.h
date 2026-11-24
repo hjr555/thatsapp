@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QString>
 
-namespace hatsapp {
+namespace thatsapp {
 
 class BadgeController : public QObject {
     Q_OBJECT
@@ -23,4 +23,4 @@ private:
     int m_unreadCount = 0;
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

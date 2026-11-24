@@ -7,7 +7,7 @@
 
 class QWebEngineProfile;
 
-namespace hatsapp {
+namespace thatsapp {
 
 class WhatsAppPage : public QWebEnginePage {
     Q_OBJECT
@@ -33,4 +33,4 @@ private:
     AppConfig &m_config;
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

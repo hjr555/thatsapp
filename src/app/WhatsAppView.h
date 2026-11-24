@@ -7,7 +7,7 @@
 
 class QWebEngineDownloadRequest;
 
-namespace hatsapp {
+namespace thatsapp {
 
 class WhatsAppView : public QWebEngineView {
     Q_OBJECT
@@ -40,4 +40,4 @@ private:
     bool m_sidebarCollapsed = false;
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

@@ -11,7 +11,7 @@ class QWebEngineDownloadRequest;
 class QWebEngineProfile;
 class QWebEngineView;
 
-namespace hatsapp {
+namespace thatsapp {
 
 class BadgeController;
 class NotificationController;
@@ -73,4 +73,4 @@ private:
     bool m_sidebarCollapsed = false;
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

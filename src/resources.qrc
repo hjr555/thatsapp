@@ -1,7 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/">
-        <file alias="knotifications6/hatsapp.notifyrc">../data/hatsapp.notifyrc</file>
-        <file alias="icons/io.github.hjr555.hatsapp.svg">../data/icons/io.github.hjr555.hatsapp.svg</file>
+        <file alias="knotifications6/thatsapp.notifyrc">../data/thatsapp.notifyrc</file>
+        <file alias="icons/io.github.hjr555.thatsapp.svg">../data/icons/io.github.hjr555.thatsapp.svg</file>
     </qresource>
 </RCC>

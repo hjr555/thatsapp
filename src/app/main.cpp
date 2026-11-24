@@ -14,20 +14,20 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
-    KLocalizedString::setApplicationDomain(QByteArrayLiteral("hatsapp"));
+    KLocalizedString::setApplicationDomain(QByteArrayLiteral("thatsapp"));
 
     KAboutData aboutData(
-        QStringLiteral("hatsapp"),
-        i18n("HatsApp"),
-        QStringLiteral(HATSAPP_VERSION),
+        QStringLiteral("thatsapp"),
+        i18n("ThatsApp"),
+        QStringLiteral(THATSAPP_VERSION),
         i18n("Native KDE Plasma 6 desktop client for WhatsApp Web"),
         KAboutLicense::MIT,
         i18n("© 2026 Hywel"));
     aboutData.setOrganizationDomain(QByteArrayLiteral("hjr555.github.io"));
-    aboutData.setDesktopFileName(QStringLiteral("io.github.hjr555.hatsapp"));
+    aboutData.setDesktopFileName(QStringLiteral("io.github.hjr555.thatsapp"));
     KAboutData::setApplicationData(aboutData);
 
-    QGuiApplication::setDesktopFileName(QStringLiteral("io.github.hjr555.hatsapp"));
+    QGuiApplication::setDesktopFileName(QStringLiteral("io.github.hjr555.thatsapp"));
 
     QCommandLineParser parser;
     aboutData.setupCommandLine(&parser);
@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
     // Enforce single instance via KDE D-Bus (with automatic Wayland xdg_activation_v1 handoff)
     KDBusService dbusService(KDBusService::Unique);
 
-    hatsapp::AppConfig config;
-    hatsapp::MainWindow window(config);
+    thatsapp::AppConfig config;
+    thatsapp::MainWindow window(config);
 
     QObject::connect(&dbusService, &KDBusService::activateRequested,
                      &window, [&window](const QStringList &arguments, const QString &) {

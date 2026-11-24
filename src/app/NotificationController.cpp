@@ -12,7 +12,7 @@
 
 #include <climits>
 
-namespace hatsapp {
+namespace thatsapp {
 
 NotificationController::NotificationController(AppConfig &config, QObject *parent)
     : QObject(parent)
@@ -140,7 +140,7 @@ void NotificationController::presentWebNotification(std::unique_ptr<QWebEngineNo
         }
         existingIt->webNotif = webNotif;
         KNotification *kNotif = existingIt->kNotif;
-        kNotif->setTitle(title.isEmpty() ? i18n("HatsApp") : title);
+        kNotif->setTitle(title.isEmpty() ? i18n("ThatsApp") : title);
         kNotif->setText(webNotif->message());
         if (!webNotif->icon().isNull()) {
             kNotif->setPixmap(QPixmap::fromImage(webNotif->icon()));
@@ -151,13 +151,13 @@ void NotificationController::presentWebNotification(std::unique_ptr<QWebEngineNo
     }
 
     auto *kNotif = new KNotification(QStringLiteral("newMessage"));
-    kNotif->setComponentName(QStringLiteral("hatsapp"));
-    kNotif->setTitle(title.isEmpty() ? i18n("HatsApp") : title);
+    kNotif->setComponentName(QStringLiteral("thatsapp"));
+    kNotif->setTitle(title.isEmpty() ? i18n("ThatsApp") : title);
     kNotif->setText(webNotif->message());
     if (!webNotif->icon().isNull()) {
         kNotif->setPixmap(QPixmap::fromImage(webNotif->icon()));
     } else {
-        kNotif->setIconName(QStringLiteral("io.github.hjr555.hatsapp"));
+        kNotif->setIconName(QStringLiteral("io.github.hjr555.thatsapp"));
     }
 
     m_activeByChat.insert(chatKey, ActiveEntry{kNotif, webNotif});
@@ -201,8 +201,8 @@ void NotificationController::showDownloadComplete(const QString &filePath)
 {
     const QFileInfo info(filePath);
     auto *kNotif = new KNotification(QStringLiteral("downloadComplete"));
-    kNotif->setComponentName(QStringLiteral("hatsapp"));
-    kNotif->setIconName(QStringLiteral("io.github.hjr555.hatsapp"));
+    kNotif->setComponentName(QStringLiteral("thatsapp"));
+    kNotif->setIconName(QStringLiteral("io.github.hjr555.thatsapp"));
     kNotif->setTitle(i18n("Download Complete"));
     kNotif->setText(info.fileName());
 
@@ -228,4 +228,4 @@ void NotificationController::showDownloadComplete(const QString &filePath)
     kNotif->sendEvent();
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

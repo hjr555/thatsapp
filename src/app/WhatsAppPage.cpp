@@ -6,7 +6,7 @@
 #include <QPointer>
 #include <QWebEngineProfile>
 
-namespace hatsapp {
+namespace thatsapp {
 
 namespace {
 
@@ -86,11 +86,11 @@ void WhatsAppPage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level,
                                             int lineNumber,
                                             const QString &sourceID)
 {
-    if (message == QStringLiteral("__hatsapp:sidebar=0")) {
+    if (message == QStringLiteral("__thatsapp:sidebar=0")) {
         Q_EMIT sidebarCollapsedChangedFromPage(false);
         return;
     }
-    if (message == QStringLiteral("__hatsapp:sidebar=1")) {
+    if (message == QStringLiteral("__thatsapp:sidebar=1")) {
         Q_EMIT sidebarCollapsedChangedFromPage(true);
         return;
     }
@@ -154,4 +154,4 @@ void WhatsAppPage::onPermissionRequested(QWebEnginePermission permission)
     }
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

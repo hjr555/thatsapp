@@ -2,7 +2,7 @@
 
 #include <QtTest/QtTest>
 
-using hatsapp::NotificationThrottler;
+using thatsapp::NotificationThrottler;
 using Action = NotificationThrottler::Action;
 
 class TestNotificationThrottler : public QObject {

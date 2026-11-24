@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(hatsapp VERSION 0.1.0 LANGUAGES CXX)
+project(thatsapp VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -37,7 +37,7 @@ find_package(KF6 6.0 REQUIRED COMPONENTS
     XmlGui
 )
 
-add_library(hatsapp_core STATIC
+add_library(thatsapp_core STATIC
     src/core/AppConfig.h
     src/core/AppConfig.cpp
     src/core/NotificationThrottler.h
@@ -51,16 +51,16 @@ add_library(hatsapp_core STATIC
     src/core/ZoomLevels.h
 )
 
-target_include_directories(hatsapp_core PUBLIC
+target_include_directories(thatsapp_core PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_link_libraries(hatsapp_core PUBLIC
+target_link_libraries(thatsapp_core PUBLIC
     Qt6::Core
     KF6::ConfigCore
 )
 
-add_executable(hatsapp
+add_executable(thatsapp
     src/app/main.cpp
     src/app/BadgeController.h
     src/app/BadgeController.cpp
@@ -79,12 +79,12 @@ add_executable(hatsapp
     src/resources.qrc
 )
 
-target_compile_definitions(hatsapp PRIVATE
-    HATSAPP_VERSION="${PROJECT_VERSION}"
+target_compile_definitions(thatsapp PRIVATE
+    THATSAPP_VERSION="${PROJECT_VERSION}"
 )
 
-target_link_libraries(hatsapp PRIVATE
-    hatsapp_core
+target_link_libraries(thatsapp PRIVATE
+    thatsapp_core
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
@@ -104,19 +104,19 @@ target_link_libraries(hatsapp PRIVATE
     KF6::XmlGui
 )
 
-install(TARGETS hatsapp
+install(TARGETS thatsapp
     RUNTIME DESTINATION ${KDE_INSTALL_BINDIR}
 )
 
-install(FILES data/io.github.hjr555.hatsapp.desktop
+install(FILES data/io.github.hjr555.thatsapp.desktop
     DESTINATION ${KDE_INSTALL_APPDIR}
 )
 
-install(FILES data/hatsapp.notifyrc
+install(FILES data/thatsapp.notifyrc
     DESTINATION ${KDE_INSTALL_KNOTIFYRCDIR}
 )
 
-install(FILES data/icons/io.github.hjr555.hatsapp.svg
+install(FILES data/icons/io.github.hjr555.thatsapp.svg
     DESTINATION ${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps
 )
 

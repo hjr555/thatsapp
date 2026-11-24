@@ -3,7 +3,7 @@
 #include <QUrlQuery>
 #include <QtTest/QtTest>
 
-using hatsapp::ProtocolRouter;
+using thatsapp::ProtocolRouter;
 
 class TestProtocolRouter : public QObject {
     Q_OBJECT

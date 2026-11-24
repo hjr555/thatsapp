@@ -35,7 +35,7 @@
 #include <QWebEngineScriptCollection>
 #include <QWebEngineSettings>
 
-namespace hatsapp {
+namespace thatsapp {
 
 namespace {
 constexpr auto kWhatsAppWebUrl = "https://web.whatsapp.com/";
@@ -45,9 +45,9 @@ MainWindow::MainWindow(AppConfig &config, QWidget *parent)
     : KMainWindow(parent)
     , m_config(config)
 {
-    setWindowTitle(i18n("HatsApp"));
-    setWindowIcon(QIcon::fromTheme(QStringLiteral("io.github.hjr555.hatsapp"),
-                                   QIcon(QStringLiteral(":/icons/io.github.hjr555.hatsapp.svg"))));
+    setWindowTitle(i18n("ThatsApp"));
+    setWindowIcon(QIcon::fromTheme(QStringLiteral("io.github.hjr555.thatsapp"),
+                                   QIcon(QStringLiteral(":/icons/io.github.hjr555.thatsapp.svg"))));
     resize(1120, 760);
 
     m_badgeController = new BadgeController(this);
@@ -97,7 +97,7 @@ MainWindow::MainWindow(AppConfig &config, QWidget *parent)
     updateNotificationMenuState();
     updateWindowTitle();
 
-    // Auto-save & restore window size/geometry via KConfig (~/.config/hatsapprc)
+    // Auto-save & restore window size/geometry via KConfig (~/.config/thatsapprc)
     setAutoSaveSettings(QStringLiteral("MainWindow"), true);
 
     qApp->installEventFilter(this);
@@ -111,7 +111,24 @@ MainWindow::~MainWindow()
         qApp->removeEventFilter(this);
     }
     if (m_devToolsView) {
-        m_devToolsView->close();
+        if (m_page) {
+            m_page->setDevToolsPage(nullptr);
+        }
+        delete m_devToolsView;
+        m_devToolsView = nullptr;
+    }
+    if (m_view) {
+        m_view->setPage(nullptr);
+        delete m_view;
+        m_view = nullptr;
+    }
+    if (m_page) {
+        delete m_page;
+        m_page = nullptr;
+    }
+    if (m_profile) {
+        delete m_profile;
+        m_profile = nullptr;
     }
 }
 
@@ -126,7 +143,7 @@ QString MainWindow::buildCleanUserAgent(const QString &defaultUserAgent)
 
 void MainWindow::setupWebEngine()
 {
-    m_profile = new QWebEngineProfile(QStringLiteral("hatsapp"), this);
+    m_profile = new QWebEngineProfile(QStringLiteral("thatsapp"), this);
 
     const QString dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
         + QStringLiteral("/webengine");
@@ -180,29 +197,29 @@ void MainWindow::installSidebarCollapseScript()
 {
     static const QString kSidebarScript = QStringLiteral(R"JS(
 (() => {
-    if (window.__hatsappSidebarInstalled) return;
-    window.__hatsappSidebarInstalled = true;
+    if (window.__thatsappSidebarInstalled) return;
+    window.__thatsappSidebarInstalled = true;
 
-    const STYLE_ID = 'hatsapp-sidebar-style';
-    const BTN_ID = 'hatsapp-sidebar-toggle-btn';
+    const STYLE_ID = 'thatsapp-sidebar-style';
+    const BTN_ID = 'thatsapp-sidebar-toggle-btn';
 
     function ensureStyle() {
         if (document.getElementById(STYLE_ID)) return;
         const style = document.createElement('style');
         style.id = STYLE_ID;
         style.textContent = `
-            html.hatsapp-sidebar-collapsed:has(#main) [data-hatsapp-sidebar="true"] {
+            html.thatsapp-sidebar-collapsed:has(#main) [data-thatsapp-sidebar="true"] {
                 display: none !important;
                 width: 0 !important;
                 min-width: 0 !important;
                 max-width: 0 !important;
                 flex: 0 0 0 !important;
             }
-            html.hatsapp-sidebar-collapsed:has(#main) [data-hatsapp-split-container="true"] {
+            html.thatsapp-sidebar-collapsed:has(#main) [data-thatsapp-split-container="true"] {
                 display: flex !important;
                 grid-template-columns: 1fr !important;
             }
-            html.hatsapp-sidebar-collapsed:has(#main) [data-hatsapp-main-pane="true"] {
+            html.thatsapp-sidebar-collapsed:has(#main) [data-thatsapp-main-pane="true"] {
                 flex: 1 1 100% !important;
                 width: 100% !important;
                 max-width: 100% !important;
@@ -210,7 +227,7 @@ void MainWindow::installSidebarCollapseScript()
                 grid-column: 1 / -1 !important;
                 left: 0 !important;
             }
-            html.hatsapp-sidebar-collapsed:has(#main) [data-hatsapp-shell="true"] {
+            html.thatsapp-sidebar-collapsed:has(#main) [data-thatsapp-shell="true"] {
                 max-width: 100% !important;
                 width: 100% !important;
                 height: 100% !important;
@@ -265,18 +282,18 @@ void MainWindow::installSidebarCollapseScript()
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const isCollapsed = document.documentElement.classList.contains('hatsapp-sidebar-collapsed');
-            window.__hatsappSetSidebarCollapsed(!isCollapsed, true);
+            const isCollapsed = document.documentElement.classList.contains('thatsapp-sidebar-collapsed');
+            window.__thatsappSetSidebarCollapsed(!isCollapsed, true);
         });
         document.body.appendChild(btn);
         return btn;
     }
 
     function clearTags() {
-        document.querySelectorAll('[data-hatsapp-sidebar]').forEach(el => el.removeAttribute('data-hatsapp-sidebar'));
-        document.querySelectorAll('[data-hatsapp-main-pane]').forEach(el => el.removeAttribute('data-hatsapp-main-pane'));
-        document.querySelectorAll('[data-hatsapp-split-container]').forEach(el => el.removeAttribute('data-hatsapp-split-container'));
-        document.querySelectorAll('[data-hatsapp-shell]').forEach(el => el.removeAttribute('data-hatsapp-shell'));
+        document.querySelectorAll('[data-thatsapp-sidebar]').forEach(el => el.removeAttribute('data-thatsapp-sidebar'));
+        document.querySelectorAll('[data-thatsapp-main-pane]').forEach(el => el.removeAttribute('data-thatsapp-main-pane'));
+        document.querySelectorAll('[data-thatsapp-split-container]').forEach(el => el.removeAttribute('data-thatsapp-split-container'));
+        document.querySelectorAll('[data-thatsapp-shell]').forEach(el => el.removeAttribute('data-thatsapp-shell'));
     }
 
     function findSidebarElement() {
@@ -288,7 +305,7 @@ void MainWindow::installSidebarCollapseScript()
     function updateButtonVisuals(mainCol) {
         const btn = ensureToggleButton();
         if (!btn) return;
-        const isCollapsed = document.documentElement.classList.contains('hatsapp-sidebar-collapsed');
+        const isCollapsed = document.documentElement.classList.contains('thatsapp-sidebar-collapsed');
         const main = document.getElementById('main');
         if (!main || !mainCol) {
             btn.removeAttribute('data-ready');
@@ -334,21 +351,21 @@ void MainWindow::installSidebarCollapseScript()
         if (!mainCol || !sideCol || mainCol === sideCol) return;
 
         if (!forceRetag
-            && mainCol.dataset.hatsappMainPane === 'true'
-            && sideCol.dataset.hatsappSidebar === 'true') {
+            && mainCol.dataset.thatsappMainPane === 'true'
+            && sideCol.dataset.thatsappSidebar === 'true') {
             updateButtonVisuals(mainCol);
             return;
         }
 
-        const wasCollapsed = document.documentElement.classList.contains('hatsapp-sidebar-collapsed');
+        const wasCollapsed = document.documentElement.classList.contains('thatsapp-sidebar-collapsed');
         if (wasCollapsed) {
-            document.documentElement.classList.remove('hatsapp-sidebar-collapsed');
+            document.documentElement.classList.remove('thatsapp-sidebar-collapsed');
         }
 
         clearTags();
-        lca.setAttribute('data-hatsapp-split-container', 'true');
-        mainCol.setAttribute('data-hatsapp-main-pane', 'true');
-        sideCol.setAttribute('data-hatsapp-sidebar', 'true');
+        lca.setAttribute('data-thatsapp-split-container', 'true');
+        mainCol.setAttribute('data-thatsapp-main-pane', 'true');
+        sideCol.setAttribute('data-thatsapp-sidebar', 'true');
 
         // Hide any left-side sibling navigation rail inside lca or up to 3 wrapper levels above lca
         const mainLeft = mainCol.getBoundingClientRect().left;
@@ -356,7 +373,7 @@ void MainWindow::installSidebarCollapseScript()
             if (ch === mainCol || ch === sideCol) continue;
             const rect = ch.getBoundingClientRect();
             if (rect.width > 0 && rect.right <= mainLeft + 12) {
-                ch.setAttribute('data-hatsapp-sidebar', 'true');
+                ch.setAttribute('data-thatsapp-sidebar', 'true');
             }
         }
 
@@ -368,18 +385,18 @@ void MainWindow::installSidebarCollapseScript()
                 if (sib === cur) continue;
                 const rect = sib.getBoundingClientRect();
                 if (rect.width > 0 && rect.width <= 140 && rect.right <= curLeft + 12) {
-                    sib.setAttribute('data-hatsapp-sidebar', 'true');
+                    sib.setAttribute('data-thatsapp-sidebar', 'true');
                 }
             }
             const cs = window.getComputedStyle(cur);
             if (cs.maxWidth && cs.maxWidth !== 'none') {
-                cur.setAttribute('data-hatsapp-shell', 'true');
+                cur.setAttribute('data-thatsapp-shell', 'true');
             }
             cur = parent;
         }
 
         if (wasCollapsed) {
-            document.documentElement.classList.add('hatsapp-sidebar-collapsed');
+            document.documentElement.classList.add('thatsapp-sidebar-collapsed');
         }
         updateButtonVisuals(mainCol);
     }
@@ -396,21 +413,21 @@ void MainWindow::installSidebarCollapseScript()
         });
     }
 
-    window.__hatsappSetSidebarCollapsed = function(collapsed, notifyHost) {
+    window.__thatsappSetSidebarCollapsed = function(collapsed, notifyHost) {
         ensureStyle();
         ensureToggleButton();
         const isCollapsed = Boolean(collapsed);
         if (isCollapsed) {
             tagLayout(true);
-            document.documentElement.classList.add('hatsapp-sidebar-collapsed');
+            document.documentElement.classList.add('thatsapp-sidebar-collapsed');
         } else {
-            document.documentElement.classList.remove('hatsapp-sidebar-collapsed');
+            document.documentElement.classList.remove('thatsapp-sidebar-collapsed');
             tagLayout(false);
         }
-        const mainCol = document.querySelector('[data-hatsapp-main-pane="true"]');
+        const mainCol = document.querySelector('[data-thatsapp-main-pane="true"]');
         updateButtonVisuals(mainCol);
         if (notifyHost) {
-            console.debug(isCollapsed ? '__hatsapp:sidebar=1' : '__hatsapp:sidebar=0');
+            console.debug(isCollapsed ? '__thatsapp:sidebar=1' : '__thatsapp:sidebar=0');
         }
     };
 
@@ -438,7 +455,7 @@ void MainWindow::installSidebarCollapseScript()
 )JS");
 
     QWebEngineScript script;
-    script.setName(QStringLiteral("hatsapp-sidebar-collapse"));
+    script.setName(QStringLiteral("thatsapp-sidebar-collapse"));
     script.setSourceCode(kSidebarScript);
     script.setInjectionPoint(QWebEngineScript::DocumentReady);
     script.setWorldId(QWebEngineScript::MainWorld);
@@ -634,8 +651,8 @@ void MainWindow::setSidebarCollapsed(bool collapsed, bool pushToWeb)
 
     if (pushToWeb && m_page) {
         const QString js = collapsed
-            ? QStringLiteral("if (window.__hatsappSetSidebarCollapsed) window.__hatsappSetSidebarCollapsed(true, false);")
-            : QStringLiteral("if (window.__hatsappSetSidebarCollapsed) window.__hatsappSetSidebarCollapsed(false, false);");
+            ? QStringLiteral("if (window.__thatsappSetSidebarCollapsed) window.__thatsappSetSidebarCollapsed(true, false);")
+            : QStringLiteral("if (window.__thatsappSetSidebarCollapsed) window.__thatsappSetSidebarCollapsed(false, false);");
         m_page->runJavaScript(js);
     }
 }
@@ -800,7 +817,7 @@ void MainWindow::toggleDevTools()
     }
     m_devToolsView = new QWebEngineView();
     m_devToolsView->setAttribute(Qt::WA_DeleteOnClose);
-    m_devToolsView->setWindowTitle(i18n("HatsApp Developer Tools"));
+    m_devToolsView->setWindowTitle(i18n("ThatsApp Developer Tools"));
     m_devToolsView->resize(1000, 700);
     m_page->setDevToolsPage(m_devToolsView->page());
     m_devToolsView->show();
@@ -825,8 +842,8 @@ void MainWindow::updateWindowTitle()
 {
     const int unread = m_badgeController->unreadCount();
     QString title = unread > 0
-        ? i18n("(%1) HatsApp", unread)
-        : i18n("HatsApp");
+        ? i18n("(%1) ThatsApp", unread)
+        : i18n("ThatsApp");
 
     if (m_notificationController->isHidden()) {
         title += i18n(" — Notifications Hidden");
@@ -836,4 +853,4 @@ void MainWindow::updateWindowTitle()
     setWindowTitle(title);
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

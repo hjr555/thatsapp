@@ -1,27 +1,29 @@
-# HatsApp
+# ThatsApp
 
-A lightweight, native **C++20 / Qt 6 / KDE Frameworks 6 (KF6)** desktop client for WhatsApp Web designed for **Fedora KDE Plasma 6 (Wayland)**.
+A Qt 6 / KDE Frameworks 6 wrapper for WhatsApp Web, built for KDE Plasma 6 on Wayland.
 
 ## Features
 
-- **Native KDE Plasma 6 integration:** `KMainWindow` geometry persistence, Plasma active Qt style (Breeze/Fusion), `KDBusService` single-instance with Wayland `xdg_activation_v1` focus handoff, and Plasma Task Manager unread badges (`com.canonical.Unity.LauncherEntry`).
-- **Anti-spam KDE Notifications (`KNotifications` / `hatsapp.notifyrc`):** Contact avatars, click-to-focus straight to the chat, focus suppression, per-chat popup coalescing & cooldown, Quick Snooze (`15m`, `1h`, `8h`, plus a **"Snooze 1 hour"** toast button), and **Hide Notifications** (`Ctrl+Shift+M`).
-- **Focused conversation layout:** Full-bleed WhatsApp Web canvas, hidden-by-default KDE menu bar (`Ctrl+M` or right-click), and **collapsible chat sidebar** (`Ctrl+B` / `F9` / right-click) for full-width conversations.
-- **Privacy-strict defaults:** Microphone, camera, geolocation, and screen capture are denied by default and strictly opt-in via **Configure HatsApp** (`Ctrl+,`).
-- **Links, protocols & polish:** External links open in your default browser, `whatsapp://` and `whatsapp-smb://` deep links route into the running window (`tel:` untouched), British English (`en_GB`) spellcheck, discrete zoom (`Ctrl++`/`-`/`0`), native KDE Save-As downloads, and opt-in `KStatusNotifierItem` system tray & close-to-tray.
+- Native Plasma notifications with contact avatars, click-to-open chat, per-chat cooldowns, and quick snooze
+- Unread count badge in the Plasma task manager
+- Collapsible chat list sidebar (`Ctrl+B` / `F9`) and hidden-by-default menu bar (`Ctrl+M`)
+- Optional system tray icon and close-to-tray
+- Camera, mic, location, and screen capture off by default (toggleable in Settings, `Ctrl+,`)
+- Opens external links in your default browser and handles `whatsapp://` links
+- Native KDE Save As dialog, zoom shortcuts, and single-instance window focus
 
-## Build & Install (Fedora KDE)
+## Building and installing
 
-Install build dependencies once:
+Built and tested on Fedora KDE. Install the build dependencies first:
 
 ```bash
 sudo ./scripts/install-build-deps.sh
 ```
 
-Build, run unit tests (`ctest`), and install to `~/.local`:
+Then build, run the tests, and install to `~/.local`:
 
 ```bash
 ./scripts/install-local.sh
 ```
 
-Launch with `hatsapp` or from your KDE Application Launcher. A Fedora RPM spec is also available at `packaging/hatsapp.spec`.
+Run `thatsapp` or launch it from your application menu. There's also a Fedora spec file in `packaging/thatsapp.spec`.

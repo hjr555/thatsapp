@@ -2,7 +2,7 @@
 
 #include <QtTest/QtTest>
 
-using hatsapp::UrlPolicy;
+using thatsapp::UrlPolicy;
 
 class TestUrlPolicy : public QObject {
     Q_OBJECT

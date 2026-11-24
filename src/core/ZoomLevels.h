@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <array>
 
-namespace hatsapp {
+namespace thatsapp {
 
 inline constexpr std::array<double, 7> kZoomLevels = {0.8, 0.9, 1.0, 1.1, 1.25, 1.35, 1.5};
 inline constexpr double kDefaultZoom = 1.0;
@@ -33,4 +33,4 @@ inline double nextZoomOut(double current)
     return kZoomLevels.front();
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

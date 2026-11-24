@@ -2,7 +2,7 @@
 
 #include <QUrlQuery>
 
-namespace hatsapp {
+namespace thatsapp {
 
 namespace {
 constexpr auto kWebWhatsAppOrigin = "https://web.whatsapp.com/";
@@ -74,4 +74,4 @@ QUrl ProtocolRouter::toWebWhatsAppUrl(const QUrl &url)
     return QUrl(QString::fromLatin1(kWebWhatsAppOrigin));
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

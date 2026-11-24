@@ -7,7 +7,7 @@
 
 class KStatusNotifierItem;
 
-namespace hatsapp {
+namespace thatsapp {
 
 class TrayController : public QObject {
     Q_OBJECT
@@ -43,4 +43,4 @@ private:
     bool m_snoozed = false;
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

@@ -3,7 +3,7 @@
 #include <KLocalizedString>
 #include <KStatusNotifierItem>
 
-namespace hatsapp {
+namespace thatsapp {
 
 TrayController::TrayController(QObject *parent)
     : QObject(parent)
@@ -57,15 +57,15 @@ void TrayController::setNotificationMutedOrSnoozed(bool hidden, bool snoozed)
 
 void TrayController::createTray()
 {
-    m_sni = new KStatusNotifierItem(QStringLiteral("io.github.hjr555.hatsapp"), this);
+    m_sni = new KStatusNotifierItem(QStringLiteral("io.github.hjr555.thatsapp"), this);
     m_sni->setCategory(KStatusNotifierItem::Communications);
-    m_sni->setIconByName(QStringLiteral("io.github.hjr555.hatsapp"));
-    m_sni->setAttentionIconByName(QStringLiteral("io.github.hjr555.hatsapp"));
-    m_sni->setTitle(i18n("HatsApp"));
+    m_sni->setIconByName(QStringLiteral("io.github.hjr555.thatsapp"));
+    m_sni->setAttentionIconByName(QStringLiteral("io.github.hjr555.thatsapp"));
+    m_sni->setTitle(i18n("ThatsApp"));
     m_sni->setStandardActionsEnabled(false);
 
     m_menu = new QMenu();
-    auto *toggleAction = m_menu->addAction(QIcon::fromTheme(QStringLiteral("window-restore")), i18n("Show / Hide HatsApp"));
+    auto *toggleAction = m_menu->addAction(QIcon::fromTheme(QStringLiteral("window-restore")), i18n("Show / Hide ThatsApp"));
     connect(toggleAction, &QAction::triggered, this, [this]() {
         Q_EMIT toggleWindowRequested(m_sni ? m_sni->providedToken() : QString());
     });
@@ -88,7 +88,7 @@ void TrayController::createTray()
 
     m_menu->addSeparator();
 
-    auto *settingsAction = m_menu->addAction(QIcon::fromTheme(QStringLiteral("configure")), i18n("Configure HatsApp..."));
+    auto *settingsAction = m_menu->addAction(QIcon::fromTheme(QStringLiteral("configure")), i18n("Configure ThatsApp..."));
     connect(settingsAction, &QAction::triggered, this, &TrayController::settingsRequested);
 
     auto *quitAction = m_menu->addAction(QIcon::fromTheme(QStringLiteral("application-exit")), i18n("Quit"));
@@ -134,7 +134,7 @@ void TrayController::updateToolTip()
     } else if (m_snoozed) {
         subTitle += i18n(" (Notifications snoozed)");
     }
-    m_sni->setToolTip(QStringLiteral("io.github.hjr555.hatsapp"), i18n("HatsApp"), subTitle);
+    m_sni->setToolTip(QStringLiteral("io.github.hjr555.thatsapp"), i18n("ThatsApp"), subTitle);
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

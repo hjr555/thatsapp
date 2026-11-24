@@ -1,8 +1,8 @@
 [Global]
-IconName=io.github.hjr555.hatsapp
-Name=HatsApp
+IconName=io.github.hjr555.thatsapp
+Name=ThatsApp
 Comment=WhatsApp Desktop Client
-DesktopEntry=io.github.hjr555.hatsapp
+DesktopEntry=io.github.hjr555.thatsapp
 
 [Event/newMessage]
 Name=New Message

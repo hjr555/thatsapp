@@ -14,7 +14,7 @@
 class KNotification;
 class QWebEngineNotification;
 
-namespace hatsapp {
+namespace thatsapp {
 
 class NotificationController : public QObject {
     Q_OBJECT
@@ -56,4 +56,4 @@ private:
     QHash<QString, ActiveEntry> m_activeByChat;
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

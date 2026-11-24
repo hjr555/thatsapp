@@ -2,7 +2,7 @@
 
 #include <QRegularExpression>
 
-namespace hatsapp {
+namespace thatsapp {
 
 int UnreadBadgeParser::parseUnreadCount(const QString &documentTitle)
 {
@@ -16,4 +16,4 @@ int UnreadBadgeParser::parseUnreadCount(const QString &documentTitle)
     return (ok && value > 0) ? value : 0;
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

@@ -16,13 +16,13 @@
 
 #include <cmath>
 
-namespace hatsapp {
+namespace thatsapp {
 
 SettingsDialog::SettingsDialog(AppConfig &config, QWidget *parent)
     : QDialog(parent)
     , m_config(config)
 {
-    setWindowTitle(i18n("Configure HatsApp"));
+    setWindowTitle(i18n("Configure ThatsApp"));
     setMinimumWidth(460);
 
     auto *mainLayout = new QVBoxLayout(this);
@@ -36,7 +36,7 @@ SettingsDialog::SettingsDialog(AppConfig &config, QWidget *parent)
     m_enableTrayCheck = new QCheckBox(i18n("Show system tray icon (Plasma StatusNotifier)"), generalTab);
     m_closeToTrayCheck = new QCheckBox(i18n("Minimise to system tray when closing the window"), generalTab);
     m_startMinimizedCheck = new QCheckBox(i18n("Start minimised to system tray"), generalTab);
-    m_autostartCheck = new QCheckBox(i18n("Launch HatsApp automatically at login"), generalTab);
+    m_autostartCheck = new QCheckBox(i18n("Launch ThatsApp automatically at login"), generalTab);
 
     generalLayout->addWidget(m_enableTrayCheck);
     generalLayout->addWidget(m_closeToTrayCheck);
@@ -53,7 +53,7 @@ SettingsDialog::SettingsDialog(AppConfig &config, QWidget *parent)
     auto *notifLayout = new QVBoxLayout(notifTab);
 
     m_hideNotifCheck = new QCheckBox(i18n("Hide all desktop notifications"), notifTab);
-    m_suppressFocusedCheck = new QCheckBox(i18n("Suppress popups while HatsApp is focused"), notifTab);
+    m_suppressFocusedCheck = new QCheckBox(i18n("Suppress popups while ThatsApp is focused"), notifTab);
     m_coalesceCheck = new QCheckBox(i18n("Replace active popup for the same chat instead of stacking"), notifTab);
 
     auto *cooldownRow = new QFormLayout();
@@ -222,4 +222,4 @@ void SettingsDialog::applyAndAccept()
     accept();
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

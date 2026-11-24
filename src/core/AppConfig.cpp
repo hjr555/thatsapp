@@ -10,10 +10,10 @@
 
 #include <algorithm>
 
-namespace hatsapp {
+namespace thatsapp {
 
 AppConfig::AppConfig(KSharedConfig::Ptr config)
-    : m_config(config ? std::move(config) : KSharedConfig::openConfig(QStringLiteral("hatsapprc")))
+    : m_config(config ? std::move(config) : KSharedConfig::openConfig(QStringLiteral("thatsapprc")))
 {
 }
 
@@ -70,7 +70,7 @@ void AppConfig::setStartMinimizedToTray(bool enabled)
 QString AppConfig::autostartDesktopFilePath()
 {
     const QString configDir = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
-    return QDir(configDir).filePath(QStringLiteral("autostart/io.github.hjr555.hatsapp.desktop"));
+    return QDir(configDir).filePath(QStringLiteral("autostart/io.github.hjr555.thatsapp.desktop"));
 }
 
 bool AppConfig::autostart() const
@@ -92,9 +92,9 @@ void AppConfig::setAutostart(bool enabled)
         QTextStream out(&file);
         out << "[Desktop Entry]\n"
             << "Type=Application\n"
-            << "Name=HatsApp\n"
-            << "Exec=hatsapp" << ((enableTrayIcon() && startMinimizedToTray()) ? " --minimized" : "") << "\n"
-            << "Icon=io.github.hjr555.hatsapp\n"
+            << "Name=ThatsApp\n"
+            << "Exec=thatsapp" << ((enableTrayIcon() && startMinimizedToTray()) ? " --minimized" : "") << "\n"
+            << "Icon=io.github.hjr555.thatsapp\n"
             << "X-GNOME-Autostart-enabled=true\n";
     }
 }
@@ -250,4 +250,4 @@ void AppConfig::sync()
     m_config->sync();
 }
 
-} // namespace hatsapp
+} // namespace thatsapp

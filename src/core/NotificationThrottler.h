@@ -6,7 +6,7 @@
 
 #include <chrono>
 
-namespace hatsapp {
+namespace thatsapp {
 
 class NotificationThrottler {
 public:
@@ -50,4 +50,4 @@ private:
     QHash<QString, QDateTime> m_lastNotifiedUtc;
 };
 
-} // namespace hatsapp
+} // namespace thatsapp

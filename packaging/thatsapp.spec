@@ -1,10 +1,10 @@
-Name:           hatsapp
+Name:           thatsapp
 Version:        0.1.0
 Release:        1%{?dist}
 Summary:        Native KDE Plasma 6 desktop client for WhatsApp Web
 
 License:        MIT
-URL:            https://github.com/hjr555/hatsapp
+URL:            https://github.com/hjr555/thatsapp
 Source0:        %{name}-%{version}.tar.gz
 
 BuildRequires:  cmake >= 3.24
@@ -34,7 +34,7 @@ Requires:       hicolor-icon-theme
 Requires:       qt6-qtwebengine
 
 %description
-HatsApp is a lightweight, native C++20 / Qt 6 / KDE Frameworks 6 desktop
+ThatsApp is a lightweight, native C++20 / Qt 6 / KDE Frameworks 6 desktop
 client for WhatsApp Web designed for KDE Plasma 6 on Wayland. It provides
 single-instance Wayland focus handoff, native KNotifications with anti-spam
 snooze and per-chat cooldown controls, Plasma Task Manager unread badges,
@@ -52,13 +52,13 @@ privacy-strict hardware permissions, and whatsapp:// protocol handling.
 
 %check
 %ctest
-desktop-file-validate %{buildroot}%{_datadir}/applications/io.github.hjr555.hatsapp.desktop
+desktop-file-validate %{buildroot}%{_datadir}/applications/io.github.hjr555.thatsapp.desktop
 
 %files
-%{_bindir}/hatsapp
-%{_datadir}/applications/io.github.hjr555.hatsapp.desktop
-%{_datadir}/knotifications6/hatsapp.notifyrc
-%{_datadir}/icons/hicolor/scalable/apps/io.github.hjr555.hatsapp.svg
+%{_bindir}/thatsapp
+%{_datadir}/applications/io.github.hjr555.thatsapp.desktop
+%{_datadir}/knotifications6/thatsapp.notifyrc
+%{_datadir}/icons/hicolor/scalable/apps/io.github.hjr555.thatsapp.svg
 
 %changelog
 * Tue Nov 24 2026 Hywel <hywel@localhost> - 0.1.0-1
