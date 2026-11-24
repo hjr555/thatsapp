@@ -41,6 +41,11 @@ rm -f "${HOME}/.cache/icon-cache.kcache"
 if command -v kbuildsycoca6 >/dev/null 2>&1; then
     kbuildsycoca6 --noincremental || true
 fi
+if command -v gdbus >/dev/null 2>&1; then
+    for group in 0 1 2 3 4 5; do
+        gdbus emit --session --object-path /KIconLoader --signal org.kde.KIconLoader.iconChanged "${group}" || true
+    done
+fi
 
 echo "==> Verifying desktop entry and icon resolution"
 if command -v desktop-file-validate >/dev/null 2>&1; then
