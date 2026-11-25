@@ -45,6 +45,9 @@ MainWindow::MainWindow(AppConfig &config, QWidget *parent)
     : KMainWindow(parent)
     , m_config(config)
 {
+    // KMainWindow enables WA_DeleteOnClose by default; disable it because MainWindow is stack-owned in main()
+    setAttribute(Qt::WA_DeleteOnClose, false);
+
     setWindowTitle(i18n("ThatsApp"));
     setWindowIcon(QIcon::fromTheme(QStringLiteral("io.github.hjr555.thatsapp"),
                                    QIcon(QStringLiteral(":/icons/io.github.hjr555.thatsapp.svg"))));
@@ -208,26 +211,31 @@ void MainWindow::installSidebarCollapseScript()
         const style = document.createElement('style');
         style.id = STYLE_ID;
         style.textContent = `
-            html.thatsapp-sidebar-collapsed:has(#main) [data-thatsapp-sidebar="true"] {
+            html.thatsapp-sidebar-collapsed [data-thatsapp-sidebar="true"] {
                 display: none !important;
                 width: 0 !important;
                 min-width: 0 !important;
                 max-width: 0 !important;
                 flex: 0 0 0 !important;
             }
-            html.thatsapp-sidebar-collapsed:has(#main) [data-thatsapp-split-container="true"] {
+            html.thatsapp-sidebar-collapsed [data-thatsapp-split-container="true"] {
                 display: flex !important;
                 grid-template-columns: 1fr !important;
             }
-            html.thatsapp-sidebar-collapsed:has(#main) [data-thatsapp-main-pane="true"] {
-                flex: 1 1 100% !important;
-                width: 100% !important;
+            html.thatsapp-sidebar-collapsed [data-thatsapp-main-pane="true"] {
+                flex: 1 1 0% !important;
+                width: auto !important;
                 max-width: 100% !important;
-                min-width: 100% !important;
+                min-width: 0 !important;
                 grid-column: 1 / -1 !important;
                 left: 0 !important;
+                border-left: none !important;
             }
-            html.thatsapp-sidebar-collapsed:has(#main) [data-thatsapp-shell="true"] {
+            html.thatsapp-sidebar-collapsed [data-thatsapp-divider-overlay="true"] {
+                border-left-color: transparent !important;
+                border-right-color: transparent !important;
+            }
+            html.thatsapp-sidebar-collapsed [data-thatsapp-shell="true"] {
                 max-width: 100% !important;
                 width: 100% !important;
                 height: 100% !important;
@@ -265,7 +273,7 @@ void MainWindow::installSidebarCollapseScript()
                 width: 24px;
                 background: rgba(32, 44, 51, 0.92);
             }
-            html:has(#main) #${BTN_ID}[data-ready="true"] {
+            #${BTN_ID}[data-ready="true"] {
                 display: flex;
             }
         `;
@@ -294,6 +302,7 @@ void MainWindow::installSidebarCollapseScript()
         document.querySelectorAll('[data-thatsapp-main-pane]').forEach(el => el.removeAttribute('data-thatsapp-main-pane'));
         document.querySelectorAll('[data-thatsapp-split-container]').forEach(el => el.removeAttribute('data-thatsapp-split-container'));
         document.querySelectorAll('[data-thatsapp-shell]').forEach(el => el.removeAttribute('data-thatsapp-shell'));
+        document.querySelectorAll('[data-thatsapp-divider-overlay]').forEach(el => el.removeAttribute('data-thatsapp-divider-overlay'));
     }
 
     function findSidebarElement() {
@@ -302,12 +311,16 @@ void MainWindow::installSidebarCollapseScript()
             || document.querySelector('[aria-label="Chat list"]');
     }
 
+    function isFlowChild(el) {
+        const pos = window.getComputedStyle(el).position;
+        return pos !== 'absolute' && pos !== 'fixed';
+    }
+
     function updateButtonVisuals(mainCol) {
         const btn = ensureToggleButton();
         if (!btn) return;
         const isCollapsed = document.documentElement.classList.contains('thatsapp-sidebar-collapsed');
-        const main = document.getElementById('main');
-        if (!main || !mainCol) {
+        if (!mainCol || !mainCol.isConnected) {
             btn.removeAttribute('data-ready');
             return;
         }
@@ -315,45 +328,68 @@ void MainWindow::installSidebarCollapseScript()
         if (isCollapsed) {
             btn.style.left = '0px';
             btn.textContent = '\u203A';
-            btn.title = 'Show chat sidebar (Ctrl+B)';
+            btn.title = 'Show chat sidebar (F9 / Ctrl+B)';
             btn.setAttribute('aria-label', 'Show chat sidebar');
         } else {
             const rect = mainCol.getBoundingClientRect();
             const leftPx = Math.max(0, Math.round(rect.left));
             btn.style.left = `${leftPx}px`;
             btn.textContent = '\u2039';
-            btn.title = 'Collapse chat sidebar (Ctrl+B)';
+            btn.title = 'Collapse chat sidebar (F9 / Ctrl+B)';
             btn.setAttribute('aria-label', 'Collapse chat sidebar');
         }
     }
 
+    function findSplitAndColumns(side) {
+        const main = document.getElementById('main');
+        if (main) {
+            const sideAncestors = new Set();
+            for (let el = side; el; el = el.parentElement) {
+                sideAncestors.add(el);
+            }
+            let lca = main.parentElement;
+            while (lca && !sideAncestors.has(lca)) {
+                lca = lca.parentElement;
+            }
+            if (lca) {
+                const mainCol = Array.from(lca.children).find(ch => ch === main || ch.contains(main));
+                const sideCol = Array.from(lca.children).find(ch => ch === side || ch.contains(side));
+                if (mainCol && sideCol && mainCol !== sideCol) {
+                    return { lca, sideCol, mainCol };
+                }
+            }
+        }
+
+        // Fallback when no chat is selected yet: locate the split container directly from #side
+        for (let col = side; col && col.parentElement && col.parentElement.id !== 'app'; col = col.parentElement) {
+            const parent = col.parentElement;
+            if (!isFlowChild(col)) continue;
+            const colRect = col.getBoundingClientRect();
+            if (colRect.width < 120) continue;
+
+            const rightPane = Array.from(parent.children).find(ch => {
+                if (ch === col || !isFlowChild(ch)) return false;
+                const r = ch.getBoundingClientRect();
+                return r.width >= 200 && r.height >= 200 && r.left >= colRect.right - 12;
+            });
+            if (rightPane) {
+                return { lca: parent, sideCol: col, mainCol: rightPane };
+            }
+        }
+        return null;
+    }
+
     function tagLayout(forceRetag) {
         const side = findSidebarElement();
-        const main = document.getElementById('main');
-        if (!side || !main) {
+        if (!side) {
             updateButtonVisuals(null);
             return;
         }
 
-        // Find lowest common ancestor of sidebar and #main
-        const sideAncestors = new Set();
-        for (let el = side; el; el = el.parentElement) {
-            sideAncestors.add(el);
-        }
-        let lca = main.parentElement;
-        while (lca && !sideAncestors.has(lca)) {
-            lca = lca.parentElement;
-        }
-        if (!lca) return;
-
-        const mainCol = Array.from(lca.children).find(ch => ch === main || ch.contains(main));
-        const sideCol = Array.from(lca.children).find(ch => ch === side || ch.contains(side));
-        if (!mainCol || !sideCol || mainCol === sideCol) return;
-
-        if (!forceRetag
-            && mainCol.dataset.thatsappMainPane === 'true'
-            && sideCol.dataset.thatsappSidebar === 'true') {
-            updateButtonVisuals(mainCol);
+        const existingMain = document.querySelector('[data-thatsapp-main-pane="true"]');
+        const existingSide = document.querySelector('[data-thatsapp-sidebar="true"]');
+        if (!forceRetag && existingMain && existingSide && existingMain.isConnected && existingSide.isConnected) {
+            updateButtonVisuals(existingMain);
             return;
         }
 
@@ -362,15 +398,40 @@ void MainWindow::installSidebarCollapseScript()
             document.documentElement.classList.remove('thatsapp-sidebar-collapsed');
         }
 
+        const parts = findSplitAndColumns(side);
+        if (!parts) {
+            if (wasCollapsed) {
+                document.documentElement.classList.add('thatsapp-sidebar-collapsed');
+            }
+            updateButtonVisuals(null);
+            return;
+        }
+
+        const { lca, sideCol, mainCol } = parts;
         clearTags();
         lca.setAttribute('data-thatsapp-split-container', 'true');
         mainCol.setAttribute('data-thatsapp-main-pane', 'true');
         sideCol.setAttribute('data-thatsapp-sidebar', 'true');
 
-        // Hide any left-side sibling navigation rail inside lca or up to 3 wrapper levels above lca
+        // Hide any left-side flow sibling navigation rail (e.g. the 64px icon <header>)
+        // and suppress phantom column-divider borders on pointer-events:none overlay layers
         const mainLeft = mainCol.getBoundingClientRect().left;
         for (const ch of Array.from(lca.children)) {
             if (ch === mainCol || ch === sideCol) continue;
+            const chCs = window.getComputedStyle(ch);
+            if (!isFlowChild(ch)) {
+                if (chCs.pointerEvents === 'none') {
+                    for (const d of ch.querySelectorAll('div')) {
+                        const dCs = window.getComputedStyle(d);
+                        const hasSideBorder = (parseFloat(dCs.borderLeftWidth) > 0 && dCs.borderLeftStyle !== 'none')
+                            || (parseFloat(dCs.borderRightWidth) > 0 && dCs.borderRightStyle !== 'none');
+                        if (hasSideBorder && dCs.pointerEvents === 'none') {
+                            d.setAttribute('data-thatsapp-divider-overlay', 'true');
+                        }
+                    }
+                }
+                continue;
+            }
             const rect = ch.getBoundingClientRect();
             if (rect.width > 0 && rect.right <= mainLeft + 12) {
                 ch.setAttribute('data-thatsapp-sidebar', 'true');
@@ -382,7 +443,7 @@ void MainWindow::installSidebarCollapseScript()
             const parent = cur.parentElement;
             const curLeft = cur.getBoundingClientRect().left;
             for (const sib of Array.from(parent.children)) {
-                if (sib === cur) continue;
+                if (sib === cur || !isFlowChild(sib)) continue;
                 const rect = sib.getBoundingClientRect();
                 if (rect.width > 0 && rect.width <= 140 && rect.right <= curLeft + 12) {
                     sib.setAttribute('data-thatsapp-sidebar', 'true');
@@ -726,7 +787,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         const bool isMuteNotif = (mods == (Qt::ControlModifier | Qt::ShiftModifier) && ke->key() == Qt::Key_M);
 
         if (isMenuBar || isSidebar || isSettings || isMuteNotif) {
-            if (event->type() == QEvent::KeyPress) {
+            if (event->type() == QEvent::KeyPress && !ke->isAutoRepeat()) {
                 if (isMenuBar) {
                     toggleMenuBar();
                 } else if (isSidebar) {
